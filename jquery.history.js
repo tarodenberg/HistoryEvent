@@ -1,5 +1,5 @@
 /**
- * jQuery history event v0.2
+ * jQuery history event v0.3
  * Copyright (c) 2011 Tom Rodenberg <tarodenberg gmail com>
  * Licensed under the GPL (http://www.gnu.org/licenses/gpl.html) license.
  */
@@ -8,6 +8,7 @@
   previousNav,
   timer,
   hashTrim = /^.*#/,
+  isLoaded = false,
   msie_iframe,
   history = 'history',
   historyadd = 'historyadd';
@@ -28,44 +29,52 @@
   }
 	
   function historycheck() {
-    var hash = msie_iframe ? msie_getHash() : location.hash;
-    if (hash != currentHash) {
-      currentHash = hash;
-            
-      if (msie_iframe) {
-        location.hash = currentHash;
+    if(currentHash) {
+      var hash = msie_iframe ? msie_getHash() : location.hash;
+      if (hash != currentHash) {
+
+        currentHash = hash;
+
+        if (msie_iframe) {
+          location.hash = currentHash;
+        }
+
+        var current = $.history.getCurrent();
+
+        $.event.trigger(history, [current, previousNav]);
+        previousNav = current;
       }
-
-      var current = $.history.getCurrent();
-
-      $.event.trigger(history, [current, previousNav]);
-      previousNav = current;
     }
   }
 
   $.history = {
     add: function(hash) {
-      hash = '#' + hash.replace(hashTrim, '');
-            
-      if (currentHash != hash) {
-        var previous = $.history.getCurrent();
-            
-        location.hash = currentHash = hash;
-            
-        if (msie_iframe) {
-          msie_setHash(currentHash);
+      if(currentHash || isLoaded) {
+        hash = '#' + hash.replace(hashTrim, '');
+
+        if (currentHash != hash) {
+          var previous = $.history.getCurrent();
+
+          location.hash = currentHash = hash;
+
+          if (msie_iframe) {
+            msie_setHash(currentHash);
+          }
+
+          $.event.trigger(historyadd, [$.history.getCurrent(), previous]);
         }
 
-        $.event.trigger(historyadd, [$.history.getCurrent(), previous]);
-      }
-            
-      if (!timer) {
-        timer = setInterval(historycheck, 100);
+        if (!timer) {
+          setTimeout(function() {
+            timer = setInterval(historycheck, 250);
+          }, 1000);
+        }
       }
     },
         
     getCurrent: function() {
-      return currentHash.replace(hashTrim, '');
+      var hash = currentHash ? currentHash : location.hash;
+      return hash ? hash.replace(hashTrim, '') : '';
     }
   };
 
@@ -78,6 +87,7 @@
   };
 
   $(function() {
+    isLoaded = true;
     currentHash = location.hash;
     if ($.browser.msie) {
       msie_iframe = $('<iframe style="display:none" src="javascript:false;"></iframe>').prependTo('body')[0];
