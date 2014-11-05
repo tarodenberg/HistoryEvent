@@ -1,7 +1,8 @@
 /**
- * jQuery history event v0.3
- * Copyright (c) 2011 Tom Rodenberg <tarodenberg gmail com>
- * Licensed under the GPL (http://www.gnu.org/licenses/gpl.html) license.
+ * jQuery history event v0.4
+ * Copyright (c) 2014 Tom Rodenberg <tarodenberg gmail com>
+ * jQuery history event is released under two licenses: new BSD, and MIT. 
+ * You may pick the license that best suits your development needs.
  */
 (function($) {
   var currentHash,
